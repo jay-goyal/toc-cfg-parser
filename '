@@ -1,0 +1,19 @@
+mod cfg;
+
+use yew::prelude::*;
+
+#[function_component]
+fn App() -> Html {
+    let lang = use_state(|| String::new());
+    let oninput = { move |input_event: InputEvent| {} };
+
+    html! {
+        <div>
+            <input {oninput} value={lang} />
+        </div>
+    }
+}
+
+fn main() {
+    yew::Renderer::<App>::new().render();
+}
