@@ -1,4 +1,5 @@
 mod cfg;
+mod grammar;
 
 use web_sys::HtmlTextAreaElement;
 use yew::prelude::*;
@@ -35,8 +36,14 @@ fn App() -> Html {
 
     html! {
         <div>
-            <textarea {oninput}  />
-            {grammar.html.clone()}
+            <h1>{"CFG Parser"}</h1>
+            <div class={classes!("main-cont")}>
+                <div class={classes!("main-inpt")}>
+                    <textarea {oninput}  />
+                    {grammar.html.clone()}
+                </div>
+                <div class={classes!("main-table")}></div>
+            </div>
         </div>
     }
 }
