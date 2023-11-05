@@ -1,10 +1,12 @@
+use std::collections::HashSet;
+
 pub struct Grammar {
-    non_terminals: Vec<char>,
-    terminals: Vec<char>,
-    rules: Vec<Rule>,
+    pub non_terminals: HashSet<char>,
+    pub terminals: HashSet<char>,
+    pub rules: Vec<Rule>,
 }
 
 pub struct Rule {
-    start: char,
-    end: Vec<char>,
+    pub start: char,
+    pub end: Vec<char>,
 }

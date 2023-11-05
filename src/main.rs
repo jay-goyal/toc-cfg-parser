@@ -1,20 +1,16 @@
-mod cfg;
 mod grammar;
 
+use grammar::defs::Grammar;
 use web_sys::HtmlTextAreaElement;
 use yew::prelude::*;
 
 struct State {
     lang: Vec<String>,
-    html: Html,
 }
 
 #[function_component]
 fn App() -> Html {
-    let grammar = use_state(|| State {
-        lang: Vec::new(),
-        html: html! {<div />},
-    });
+    let grammar = use_state(|| State { lang: Vec::new() });
     let oninput = {
         let grammar = grammar.clone();
         move |input_event: InputEvent| {
@@ -22,29 +18,30 @@ fn App() -> Html {
             let val = target.value();
             let langiter = val.split("\n");
             let lang = langiter.clone().map(|rule| rule.to_string()).collect();
-            let html = langiter
-                .clone()
-                .map(|rule| {
-                    html! {
-                    <p>{rule}</p>
-                    }
-                })
-                .collect();
-            grammar.set(State { lang, html })
+            grammar.set(State { lang })
         }
     };
+    use_effect(move || {
+        Grammar::grammar_from_string(&grammar.lang);
+    });
 
     html! {
-        <div>
+        <>
             <h1>{"CFG Parser"}</h1>
-            <div class={classes!("main-cont")}>
+            <section class={classes!("main-cont")}>
                 <div class={classes!("main-inpt")}>
                     <textarea {oninput}  />
-                    {grammar.html.clone()}
+                    <div class={classes!("main-guide")}>
+                        <small>{"All terminals and non terminals should be single characters."}</small>
+                        <br />
+                        <small>{"Terminals should be lower case and non terminals upper case"}</small>
+                        <br />
+                        <small>{"Start symbol should be 'S'"}</small>
+                    </div>
                 </div>
                 <div class={classes!("main-table")}></div>
-            </div>
-        </div>
+            </section>
+        </>
     }
 }
 
