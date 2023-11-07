@@ -934,7 +934,7 @@ dependencies = [
 name = "toc-parser"
 version = "0.1.0"
 dependencies = [
- "gloo-console 0.3.0",
+ "gloo 0.10.0",
  "web-sys",
  "yew",
 ]
