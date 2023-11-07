@@ -170,6 +170,9 @@ fn App() -> Html {
                 </div>
                 <div class={classes!("main-table")}></div>
             </section>
+            <footer>
+                <small><a class={classes!("secondary")} href="https://github.com/jay-goyal/toc-cfg-parser">{"Source Code"}</a></small>
+            </footer>
         </>
     }
 }
