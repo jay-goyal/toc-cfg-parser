@@ -105,7 +105,7 @@ fn App() -> Html {
                     <table>
                         <tr>
                             <th>{"Non Terminals"}</th>
-                            <th>{"Follow Set"}</th>
+                            <th>{"First Set"}</th>
                         </tr>
                         {first_tab}
                     </table>
