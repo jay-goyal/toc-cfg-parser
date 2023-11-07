@@ -674,7 +674,7 @@ async function __wbg_init(input) {
     if (wasm !== undefined) return wasm;
 
     if (typeof input === 'undefined') {
-        input = new URL('toc-parser-a3ef8fe5d068450_bg.wasm', import.meta.url);
+        input = new URL('toc-parser-1afa529fae2b8cf9_bg.wasm', import.meta.url);
     }
     const imports = __wbg_get_imports();
 
