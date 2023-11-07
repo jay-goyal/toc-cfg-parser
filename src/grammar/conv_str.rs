@@ -83,12 +83,12 @@ impl Grammar {
         }
 
         log!(
-            "NON TERMINALS: {}",
+            "NON TERMINALS: ",
             non_terminals.clone().into_iter().collect::<String>()
         );
 
         log!(
-            "TERMINALS: {}",
+            "TERMINALS: ",
             terminals.clone().into_iter().collect::<String>()
         );
 

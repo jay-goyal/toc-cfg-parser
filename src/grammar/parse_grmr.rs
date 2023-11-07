@@ -1,5 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
+use gloo::console::log;
+
 use super::{Grammar, GrammarRule};
 
 impl Grammar {
@@ -18,6 +20,16 @@ impl Grammar {
                 Ok(_) => (),
                 Err(e) => return Err(e),
             }
+            log!(format!(
+                "{} -> {}",
+                nt,
+                first
+                    .get(&nt)
+                    .unwrap()
+                    .iter()
+                    .map(|x| x.0)
+                    .collect::<String>()
+            ))
         }
         for r in first {
             for v in r.1 {
@@ -53,6 +65,11 @@ impl Grammar {
                 'rule_loop: for j in 0..rule.end.len() {
                     let var = rule.end[j];
                     if var.is_ascii_lowercase() {
+                        log!(format!(
+                            "{} -> {}",
+                            rule.start,
+                            rule.end.clone().into_iter().collect::<String>()
+                        ));
                         first.get_mut(&c).unwrap().insert((var, i));
                         break 'rule_loop;
                     } else {

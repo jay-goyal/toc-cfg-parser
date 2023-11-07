@@ -92,9 +92,15 @@ fn App() -> Html {
                             })
                             .collect::<String>();
                         str = String::from(str.trim_end_matches(","));
+                        let nullable = match table.get(&(*nt, 'e')) {
+                            Some(_) => String::from("✓"),
+                            None => String::from("✗"),
+                        };
+
                         html! {
                             <tr>
                                 <td>{nt}</td>
+                                <td>{nullable}</td>
                                 <td>{str}</td>
                             </tr>
                         }
@@ -105,6 +111,7 @@ fn App() -> Html {
                     <table>
                         <tr>
                             <th>{"Non Terminals"}</th>
+                            <th>{"Nullable"}</th>
                             <th>{"First Set"}</th>
                         </tr>
                         {first_tab}
