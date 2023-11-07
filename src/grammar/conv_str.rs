@@ -64,7 +64,10 @@ impl Grammar {
         let mut terminals = HashSet::new();
         let mut rules = Vec::new();
         for rule_str in rules_str {
-            rules.extend(GrammarRule::rule_from_string(rule_str));
+            match GrammarRule::rule_from_string(rule_str) {
+                Ok(r) => rules.extend(r),
+                Err(e) => return Err(e),
+            }
         }
 
         for rule in &rules {
@@ -110,18 +113,38 @@ impl Grammar {
 }
 
 impl GrammarRule {
-    pub fn rule_from_string(rule_str: &String) -> Vec<GrammarRule> {
+    pub fn rule_from_string(rule_str: &String) -> Result<Vec<GrammarRule>, String> {
         let r: Vec<&str> = rule_str.split("->").collect();
         let dests: Vec<&str> = r[1].split("|").collect();
         let start = r[0].chars().nth(0).unwrap();
         let mut rules = Vec::new();
         for dest in dests {
+            let mut is_eps = false;
+            let mut is_started = false;
             let mut end = Vec::new();
             for ch in dest.trim().chars() {
+                if is_eps {
+                    return Err(String::from(
+                        "Empty transitions can not have other characters",
+                    ));
+                }
+
                 end.push(ch);
+
+                if ch == 'e' {
+                    if !is_started {
+                        is_eps = true;
+                    } else {
+                        return Err(String::from(
+                            "Empty transitions can not have other characters",
+                        ));
+                    }
+                }
+
+                is_started = true;
             }
             rules.push(GrammarRule { start, end });
         }
-        rules
+        Ok(rules)
     }
 }
