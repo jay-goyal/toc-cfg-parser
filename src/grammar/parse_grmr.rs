@@ -5,25 +5,51 @@ use gloo::console::log;
 use super::{Grammar, GrammarRule};
 
 impl Grammar {
-    pub fn get_parsing_table(&self) -> Result<HashMap<(char, char), usize>, String> {
-        let mut tab: HashMap<(char, char), usize> = HashMap::new();
+    pub fn get_parsing_table(
+        &self,
+    ) -> Result<
+        (
+            HashMap<char, HashSet<(char, usize)>>,
+            HashMap<char, HashSet<(char, usize)>>,
+        ),
+        String,
+    > {
         let mut first: HashMap<char, HashSet<(char, usize)>> = HashMap::new();
         let mut calc_first: HashMap<char, bool> = HashMap::new();
+        let mut follow: HashMap<char, HashSet<(char, usize)>> = HashMap::new();
+        let mut calc_follow: HashMap<char, bool> = HashMap::new();
         let rules = self.rules.clone();
         let non_terminals = self.non_terminals.clone();
         for nt in &non_terminals {
+            let l = rules.len() + 1;
             first.insert(*nt, HashSet::new());
             calc_first.insert(*nt, false);
+            follow.insert(*nt, HashSet::from([('#', l)]));
+            calc_follow.insert(*nt, false);
         }
         for nt in &non_terminals {
             match Grammar::get_first(*nt, *nt, true, &rules, &mut calc_first, &mut first) {
                 Ok(_) => (),
                 Err(e) => return Err(e),
             }
+        }
+        for nt in &non_terminals {
+            match Grammar::get_follow(
+                *nt,
+                *nt,
+                true,
+                &rules,
+                &mut calc_follow,
+                &mut follow,
+                &first,
+            ) {
+                Ok(_) => (),
+                Err(e) => return Err(e),
+            }
             log!(format!(
-                "{} -> {}",
+                "FOLLOW {} -> {}",
                 nt,
-                first
+                follow
                     .get(&nt)
                     .unwrap()
                     .iter()
@@ -31,16 +57,8 @@ impl Grammar {
                     .collect::<String>()
             ))
         }
-        for r in first {
-            for v in r.1 {
-                match tab.insert((r.0, v.0), v.1) {
-                    None => (),
-                    Some(_) => return Err(String::from("CFG is ambiguous")),
-                }
-            }
-        }
 
-        Ok(tab)
+        Ok((first, follow))
     }
 
     fn get_first(
@@ -56,7 +74,7 @@ impl Grammar {
         }
 
         if c == start && !is_first {
-            return Err(String::from("Grammar is not LL1"));
+            return Err(String::from("CFG is not LL1"));
         }
 
         for i in 0..rules.len() {
@@ -106,14 +124,91 @@ impl Grammar {
         Ok(())
     }
 
-    //     fn get_follow(
-    //         c: char,
-    //         start: char,
-    //         is_first: bool,
-    //         rules: &Vec<GrammarRule>,
-    //         calc_first: &mut HashMap<char, bool>,
-    //         first: &mut HashMap<char, HashSet<(char, usize)>>,
-    //     ) -> Result<(), String> {
-    //         Ok(())
-    //     }
+    fn get_follow(
+        c: char,
+        start: char,
+        is_first: bool,
+        rules: &Vec<GrammarRule>,
+        calc_follow: &mut HashMap<char, bool>,
+        follow: &mut HashMap<char, HashSet<(char, usize)>>,
+        first: &HashMap<char, HashSet<(char, usize)>>,
+    ) -> Result<(), String> {
+        if calc_follow.get(&c).unwrap().clone() {
+            return Ok(());
+        }
+
+        if c == start && !is_first {
+            return Err(String::from("CFG is not LL1"));
+        }
+
+        for i in 0..rules.len() {
+            let rule = rules.get(i).unwrap().clone();
+            let len = rule.end.len();
+            for j in 0..len {
+                if rule.end[j] == c {
+                    let s = rule.start;
+                    if j < len - 1 {
+                        let next = rule.end[j + 1];
+                        if next.is_ascii_lowercase() {
+                            follow.get_mut(&c).unwrap().insert((next, i));
+                        } else {
+                            let mut fi = first.get(&next).unwrap().clone();
+                            let mut r = None;
+                            for x in fi.iter() {
+                                if x.0 == 'e' {
+                                    r = Some(*x);
+                                    break;
+                                }
+                            }
+                            match r {
+                                None => {
+                                    follow.get_mut(&c).unwrap().extend(fi);
+                                }
+                                Some(x) => {
+                                    fi.remove(&x);
+                                    follow.get_mut(&c).unwrap().extend(fi);
+                                    if !calc_follow.get(&s).unwrap() {
+                                        match Grammar::get_follow(
+                                            s,
+                                            start,
+                                            false,
+                                            rules,
+                                            calc_follow,
+                                            follow,
+                                            first,
+                                        ) {
+                                            Ok(()) => (),
+                                            Err(e) => return Err(e),
+                                        }
+                                    }
+                                    let fo = follow.get(&s).unwrap().clone();
+                                    follow.get_mut(&c).unwrap().extend(fo);
+                                }
+                            }
+                        }
+                    } else {
+                        if !calc_follow.get(&s).unwrap() {
+                            match Grammar::get_follow(
+                                s,
+                                start,
+                                false,
+                                rules,
+                                calc_follow,
+                                follow,
+                                first,
+                            ) {
+                                Ok(()) => (),
+                                Err(e) => return Err(e),
+                            }
+                        }
+                        let fo = follow.get(&s).unwrap().clone();
+                        follow.get_mut(&c).unwrap().extend(fo);
+                    }
+                }
+            }
+        }
+
+        calc_follow.insert(c, true);
+        Ok(())
+    }
 }

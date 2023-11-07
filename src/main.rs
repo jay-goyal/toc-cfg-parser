@@ -1,6 +1,6 @@
 mod grammar;
 
-use std::collections::HashMap;
+use std::{collections::HashMap, ptr::null};
 
 use gloo::dialogs::alert;
 use grammar::Grammar;
@@ -57,11 +57,11 @@ fn App() -> Html {
                     Ok(x) => x,
                     Err(e) => {
                         alert(&e);
-                        HashMap::new()
+                        (HashMap::new(), HashMap::new())
                     }
                 };
 
-                if table.is_empty() {
+                if table.0.is_empty() {
                     return;
                 }
 
@@ -84,24 +84,40 @@ fn App() -> Html {
                 let mut first_tab = nts
                     .iter()
                     .map(|nt| {
-                        let mut str = ts
+                        // let nullable = match table.get(&(*nt, 'e')) {
+                        //     Some(_) => String::from("✓"),
+                        //     None => String::from("✗"),
+                        // };
+                        let mut nullable = String::from("✗");
+                        let mut str_fi = table
+                            .0
+                            .get(&nt)
+                            .unwrap()
                             .iter()
-                            .map(|t| match table.get(&(*nt, *t)) {
-                                Some(_) => format!("{},", t),
-                                None => String::new(),
+                            .map(|x| {
+                                if x.0 == 'e' {
+                                    nullable = String::from("✓");
+                                }
+                                format!("{},", x.0)
                             })
                             .collect::<String>();
-                        str = String::from(str.trim_end_matches(","));
-                        let nullable = match table.get(&(*nt, 'e')) {
-                            Some(_) => String::from("✓"),
-                            None => String::from("✗"),
-                        };
+                        str_fi = String::from(str_fi.trim_end_matches(","));
+
+                        let mut str_fo = table
+                            .1
+                            .get(&nt)
+                            .unwrap()
+                            .iter()
+                            .map(|x| format!("{},", x.0))
+                            .collect::<String>();
+                        str_fo = String::from(str_fo.trim_end_matches(","));
 
                         html! {
                             <tr>
                                 <td>{nt}</td>
                                 <td>{nullable}</td>
-                                <td>{str}</td>
+                                <td>{str_fi}</td>
+                                <td>{str_fo}</td>
                             </tr>
                         }
                     })
@@ -113,6 +129,7 @@ fn App() -> Html {
                             <th>{"Non Terminals"}</th>
                             <th>{"Nullable"}</th>
                             <th>{"First Set"}</th>
+                            <th>{"Follow Set"}</th>
                         </tr>
                         {first_tab}
                     </table>
