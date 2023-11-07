@@ -3,7 +3,8 @@ use std::collections::{HashMap, HashSet};
 use super::{Grammar, GrammarRule};
 
 impl Grammar {
-    pub fn get_parsing_table(&self) -> Result<HashMap<(char, char), GrammarRule>, String> {
+    pub fn get_parsing_table(&self) -> Result<HashMap<(char, char), usize>, String> {
+        let mut tab: HashMap<(char, char), usize> = HashMap::new();
         let mut first: HashMap<char, HashSet<(char, usize)>> = HashMap::new();
         let mut calc_first: HashMap<char, bool> = HashMap::new();
         let rules = self.rules.clone();
@@ -18,7 +19,16 @@ impl Grammar {
                 Err(e) => return Err(e),
             }
         }
-        Ok(HashMap::new())
+        for r in first {
+            for v in r.1 {
+                match tab.insert((r.0, v.0), v.1) {
+                    None => (),
+                    Some(_) => return Err(String::from("CFG is ambiguous")),
+                }
+            }
+        }
+
+        Ok(tab)
     }
 
     fn get_first(
@@ -79,14 +89,14 @@ impl Grammar {
         Ok(())
     }
 
-    fn get_follow(
-        c: char,
-        start: char,
-        is_first: bool,
-        rules: &Vec<GrammarRule>,
-        calc_first: &mut HashMap<char, bool>,
-        first: &mut HashMap<char, HashSet<(char, usize)>>,
-    ) -> Result<(), String> {
-        Ok(())
-    }
+    //     fn get_follow(
+    //         c: char,
+    //         start: char,
+    //         is_first: bool,
+    //         rules: &Vec<GrammarRule>,
+    //         calc_first: &mut HashMap<char, bool>,
+    //         first: &mut HashMap<char, HashSet<(char, usize)>>,
+    //     ) -> Result<(), String> {
+    //         Ok(())
+    //     }
 }

@@ -20,7 +20,8 @@ impl Grammar {
                     ));
                 }
                 for c in s.trim().chars() {
-                    if !c.is_ascii_alphabetic() {
+                    if !c.is_ascii_alphabetic() && c != ' ' && c != '|' {
+                        log!(s.trim());
                         log!(c.to_string());
                         return Err(String::from("Parser only supports ASCII alphabets for now"));
                     }
@@ -75,7 +76,7 @@ impl Grammar {
             for t in &rule.end {
                 if t.is_lowercase() && *t != 'e' {
                     terminals.insert(*t);
-                } else {
+                } else if *t != 'e' {
                     non_terminals.insert(*t);
                 }
             }

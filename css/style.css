@@ -16,6 +16,10 @@ small {
   text-align: center;
 }
 
+textarea {
+  resize: vertical;
+}
+
 .main-cont {
   display: grid;
   grid-template-columns: 2fr 3fr;
