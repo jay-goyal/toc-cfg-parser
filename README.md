@@ -1,14 +1,16 @@
 # LL1 CFG Parser
 
-This project aims to parse a LL1 unambiguous CFG
+This project aims to parse a LL1 unambiguous CFG. It is written in pure Rust.
+The frontend is written using [Yew](https://yew.rs/)
 
 ### [Web Deployment](https://toc-cfg-parser.pages.dev/)
 
 ### Local Deployment
 
 1. Clone the repo
-2. Run `cargo install trunk`
-3. Run `trunk serve .`
+2. Setup [Rust](https://www.rust-lang.org/tools/install)
+3. Run `cargo install trunk`
+4. Run `trunk serve .`
 
 ### Issues
 
