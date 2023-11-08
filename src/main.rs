@@ -124,7 +124,7 @@ fn App() -> Html {
 
     html! {
         <>
-            <h1>{"CFG Parser"}</h1>
+            <h1>{"LL1 CFG Parser"}</h1>
             <section class={classes!("main-cont")}>
                 <div class={classes!("main-grmr")}>
                     <textarea id={"cfg-inpt"}  placeholder={"CFG"}  />
