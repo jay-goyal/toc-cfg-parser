@@ -13,7 +13,7 @@ impl Grammar {
         for fi in first {
             for c in fi.1 {
                 match tab.insert((*fi.0, c.0), c.1) {
-                    Some(_) => return Err(String::from("Grammar is ambiguous")),
+                    Some(_) => return Err(String::from("CFG is not LL1")),
                     None => (),
                 }
             }
@@ -24,9 +24,8 @@ impl Grammar {
                 None => (),
                 Some(&x) => {
                     for c in fo.1 {
-                        log!(format!("{}, {}", fo.0, c.0));
                         match tab.insert((*fo.0, c.0), x) {
-                            Some(_) => return Err(String::from("Grammar is ambiguous")),
+                            Some(_) => return Err(String::from("CFG is not LL1")),
                             None => (),
                         }
                     }
@@ -182,7 +181,7 @@ impl Grammar {
         }
 
         if c == start && !is_first {
-            return Err(String::from("CFG is not LL1"));
+            return Ok(());
         }
 
         for i in 0..rules.len() {

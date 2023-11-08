@@ -34,7 +34,7 @@ pub fn get_grmr_tab_html(grammar: Grammar) -> TabHtml {
         .clone()
         .into_iter()
         .collect::<Vec<char>>();
-    ts.push('e');
+    ts.push('#');
 
     let nts = grammar
         .clone()
@@ -43,20 +43,20 @@ pub fn get_grmr_tab_html(grammar: Grammar) -> TabHtml {
         .into_iter()
         .collect::<Vec<char>>();
 
+    let fi_fo_tab = get_first_tab(&nts, &table);
+
     let parse_tab;
     match Grammar::get_parsing_table(&table.0, &table.1) {
         Ok(tab) => parse_tab = tab,
         Err(e) => {
             alert(&e);
             return TabHtml {
-                fi_fo_tab: html!(<></>),
+                fi_fo_tab,
                 ll1_parse_tab: html!(<></>),
                 parse_tab: HashMap::new(),
             };
         }
     }
-
-    let fi_fo_tab = get_first_tab(&nts, &table);
     let ll1_parse_tab = get_second_tab(&ts, &nts, &parse_tab, &grammar.rules);
 
     TabHtml {
