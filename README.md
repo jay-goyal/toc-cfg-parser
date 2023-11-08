@@ -1,6 +1,8 @@
 # LL1 CFG Parser
 
 This project aims to parse a LL1 unambiguous CFG. It is written in pure Rust.
+The parse table generated for a string is a top down parse table. So, the rules can be written down in a top down fashion to get the parse tree
+<br />
 The frontend is written using [Yew](https://yew.rs/)
 
 ### [Web Deployment](https://toc-cfg-parser.pages.dev/)
