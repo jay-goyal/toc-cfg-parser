@@ -6,8 +6,41 @@ use super::{Grammar, GrammarRule};
 
 impl Grammar {
     pub fn get_parsing_table(
+        first: &HashMap<char, HashSet<(char, usize)>>,
+        follow: &HashMap<char, HashSet<(char, usize)>>,
+    ) -> Result<HashMap<(char, char), usize>, String> {
+        let mut tab = HashMap::new();
+        for fi in first {
+            for c in fi.1 {
+                match tab.insert((*fi.0, c.0), c.1) {
+                    Some(_) => return Err(String::from("Grammar is ambiguous")),
+                    None => (),
+                }
+            }
+        }
+
+        for fo in follow {
+            match tab.get(&(*fo.0, 'e')) {
+                None => (),
+                Some(&x) => {
+                    for c in fo.1 {
+                        log!(format!("{}, {}", fo.0, c.0));
+                        match tab.insert((*fo.0, c.0), x) {
+                            Some(_) => return Err(String::from("Grammar is ambiguous")),
+                            None => (),
+                        }
+                    }
+                }
+            }
+        }
+
+        Ok(tab)
+    }
+
+    pub fn get_fi_fo(
         &self,
     ) -> Result<
+        // T: (first, follow)
         (
             HashMap<char, HashSet<(char, usize)>>,
             HashMap<char, HashSet<(char, usize)>>,
@@ -18,21 +51,29 @@ impl Grammar {
         let mut calc_first: HashMap<char, bool> = HashMap::new();
         let mut follow: HashMap<char, HashSet<(char, usize)>> = HashMap::new();
         let mut calc_follow: HashMap<char, bool> = HashMap::new();
+
         let rules = self.rules.clone();
         let non_terminals = self.non_terminals.clone();
+
         for nt in &non_terminals {
             let l = rules.len() + 1;
             first.insert(*nt, HashSet::new());
             calc_first.insert(*nt, false);
-            follow.insert(*nt, HashSet::from([('#', l)]));
+            if *nt == 'S' {
+                follow.insert(*nt, HashSet::from([('#', l)]));
+            } else {
+                follow.insert(*nt, HashSet::new());
+            }
             calc_follow.insert(*nt, false);
         }
+
         for nt in &non_terminals {
             match Grammar::get_first(*nt, *nt, true, &rules, &mut calc_first, &mut first) {
                 Ok(_) => (),
                 Err(e) => return Err(e),
             }
         }
+
         for nt in &non_terminals {
             match Grammar::get_follow(
                 *nt,
@@ -83,19 +124,12 @@ impl Grammar {
                 'rule_loop: for j in 0..rule.end.len() {
                     let var = rule.end[j];
                     if var.is_ascii_lowercase() {
-                        log!(format!(
-                            "{} -> {}",
-                            rule.start,
-                            rule.end.clone().into_iter().collect::<String>()
-                        ));
                         first.get_mut(&c).unwrap().insert((var, i));
                         break 'rule_loop;
                     } else {
                         let mut to_continue = false;
                         if !calc_first.get(&rule.start).unwrap() {
-                            match Grammar::get_first(
-                                rule.start, start, false, rules, calc_first, first,
-                            ) {
+                            match Grammar::get_first(var, start, false, rules, calc_first, first) {
                                 Ok(()) => (),
                                 Err(e) => return Err(e),
                             }
@@ -120,6 +154,16 @@ impl Grammar {
         }
 
         calc_first.insert(c, true);
+        log!(format!(
+            "FIRST {} -> {}",
+            c,
+            first
+                .get(&c)
+                .unwrap()
+                .iter()
+                .map(|x| x.0)
+                .collect::<String>()
+        ));
 
         Ok(())
     }
@@ -186,7 +230,7 @@ impl Grammar {
                                 }
                             }
                         }
-                    } else {
+                    } else if s != c {
                         if !calc_follow.get(&s).unwrap() {
                             match Grammar::get_follow(
                                 s,

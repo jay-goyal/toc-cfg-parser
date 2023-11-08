@@ -130,7 +130,9 @@ impl GrammarRule {
                     ));
                 }
 
-                end.push(ch);
+                if ch != ' ' {
+                    end.push(ch);
+                }
 
                 if ch == 'e' {
                     if !is_started {

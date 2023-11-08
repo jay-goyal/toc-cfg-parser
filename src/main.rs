@@ -1,16 +1,17 @@
 mod grammar;
-
-use std::{collections::HashMap, ptr::null};
+mod render;
 
 use gloo::dialogs::alert;
 use grammar::Grammar;
+use render::get_grmr_tab_html;
 use web_sys::HtmlTextAreaElement;
 use yew::prelude::*;
 
 struct State {
     lang: Vec<String>,
     grammar: Option<Grammar>,
-    first_tab: Html,
+    fi_fo_tab: Html,
+    ll1_parse_tab: Html,
 }
 
 #[function_component]
@@ -18,7 +19,8 @@ fn App() -> Html {
     let state = use_state(|| State {
         lang: Vec::new(),
         grammar: None,
-        first_tab: html!(<></>),
+        fi_fo_tab: html!(<></>),
+        ll1_parse_tab: html!(<></>),
     });
 
     let oninput_cfg = {
@@ -29,11 +31,13 @@ fn App() -> Html {
             let langiter = val.split("\n");
             let lang: Vec<String> = langiter.clone().map(|rule| rule.to_string()).collect();
             let grammar = state.grammar.clone();
-            let first_tab = state.first_tab.clone();
+            let fi_fo_tab = state.fi_fo_tab.clone();
+            let ll1_parse_tab = state.ll1_parse_tab.clone();
             state.set(State {
                 lang,
                 grammar,
-                first_tab,
+                fi_fo_tab,
+                ll1_parse_tab,
             })
         }
     };
@@ -52,99 +56,21 @@ fn App() -> Html {
                 }
             };
 
+            let grmr_tab = get_grmr_tab_html(grammar.clone().unwrap());
+
             if is_grammer_set {
-                let table = match grammar.clone().unwrap().get_parsing_table() {
-                    Ok(x) => x,
-                    Err(e) => {
-                        alert(&e);
-                        (HashMap::new(), HashMap::new())
-                    }
-                };
-
-                if table.0.is_empty() {
-                    return;
-                }
-
-                let ts = grammar
-                    .clone()
-                    .unwrap()
-                    .terminals
-                    .clone()
-                    .into_iter()
-                    .collect::<Vec<char>>();
-
-                let nts = grammar
-                    .clone()
-                    .unwrap()
-                    .non_terminals
-                    .clone()
-                    .into_iter()
-                    .collect::<Vec<char>>();
-
-                let mut first_tab = nts
-                    .iter()
-                    .map(|nt| {
-                        // let nullable = match table.get(&(*nt, 'e')) {
-                        //     Some(_) => String::from("✓"),
-                        //     None => String::from("✗"),
-                        // };
-                        let mut nullable = String::from("✗");
-                        let mut str_fi = table
-                            .0
-                            .get(&nt)
-                            .unwrap()
-                            .iter()
-                            .map(|x| {
-                                if x.0 == 'e' {
-                                    nullable = String::from("✓");
-                                }
-                                format!("{},", x.0)
-                            })
-                            .collect::<String>();
-                        str_fi = String::from(str_fi.trim_end_matches(","));
-
-                        let mut str_fo = table
-                            .1
-                            .get(&nt)
-                            .unwrap()
-                            .iter()
-                            .map(|x| format!("{},", x.0))
-                            .collect::<String>();
-                        str_fo = String::from(str_fo.trim_end_matches(","));
-
-                        html! {
-                            <tr>
-                                <td>{nt}</td>
-                                <td>{nullable}</td>
-                                <td>{str_fi}</td>
-                                <td>{str_fo}</td>
-                            </tr>
-                        }
-                    })
-                    .collect::<Html>();
-
-                first_tab = html! {
-                    <table>
-                        <tr>
-                            <th>{"Non Terminals"}</th>
-                            <th>{"Nullable"}</th>
-                            <th>{"First Set"}</th>
-                            <th>{"Follow Set"}</th>
-                        </tr>
-                        {first_tab}
-                    </table>
-                };
-
                 state.set(State {
                     lang,
                     grammar,
-                    first_tab,
+                    fi_fo_tab: grmr_tab.fi_fo_tab,
+                    ll1_parse_tab: grmr_tab.ll1_parse_tab,
                 })
             } else {
                 state.set(State {
                     lang,
                     grammar,
-                    first_tab: html!(<></>),
+                    fi_fo_tab: html!(<></>),
+                    ll1_parse_tab: html!(<></>),
                 })
             }
         }
@@ -166,12 +92,18 @@ fn App() -> Html {
                         <br />
                         <small>{"Empty symbol should be denoted by 'e'"}</small>
                     </div>
-                    {state.first_tab.clone()}
+                    <figure>{state.fi_fo_tab.clone()}</figure>
+                    <figure>{state.ll1_parse_tab.clone()}</figure>
                 </div>
                 <div class={classes!("main-table")}></div>
             </section>
             <footer>
-                <small><a class={classes!("secondary")} href="https://github.com/jay-goyal/toc-cfg-parser">{"Source Code"}</a></small>
+                <small class={classes!("muted")}>
+                    {"Made with ❤ by "}
+                    <a class={classes!("secondary")} href="https://github.com/jay-goyal">{"Jay Goyal"}</a>
+                    {" | "}
+                    <a class={classes!("secondary")} href="https://github.com/jay-goyal/toc-cfg-parser">{"Source Code"}</a>
+                </small>
             </footer>
         </>
     }

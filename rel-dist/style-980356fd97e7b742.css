@@ -36,3 +36,11 @@ footer {
   display: flex;
   justify-content: center;
 }
+
+.muted {
+  color: var(--secondary);
+}
+
+a.secondary {
+  text-decoration: none;
+}
