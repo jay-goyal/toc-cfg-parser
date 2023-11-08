@@ -1,5 +1,6 @@
 pub mod conv_str;
 pub mod parse_grmr;
+pub mod parse_str;
 use std::collections::HashSet;
 
 #[derive(Clone)]

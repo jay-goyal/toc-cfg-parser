@@ -34,7 +34,7 @@ pub fn get_grmr_tab_html(grammar: Grammar) -> TabHtml {
         .clone()
         .into_iter()
         .collect::<Vec<char>>();
-    ts.push('#');
+    ts.push('$');
 
     let nts = grammar
         .clone()
@@ -118,12 +118,12 @@ fn get_first_tab(
     first_tab = html! {
         <figure>
             <table>
-                <tr>
+                <thead>
                     <th>{"Non Terminals"}</th>
                     <th>{"Nullable"}</th>
                     <th>{"First Set"}</th>
                     <th>{"Follow Set"}</th>
-                </tr>
+                </thead>
                 {first_tab}
             </table>
         </figure>
@@ -165,10 +165,10 @@ fn get_second_tab(
     let fi_fo_tab_head = nts.iter().map(|nt| html!(<th>{nt}</th>)).collect::<Html>();
     html!(
         <table>
-            <tr>
+            <thead>
                 <th></th>
                 {fi_fo_tab_head}
-            </tr>
+            </thead>
             {fi_fo_tab_dat}
         </table>
     )

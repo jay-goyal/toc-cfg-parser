@@ -59,7 +59,7 @@ impl Grammar {
             first.insert(*nt, HashSet::new());
             calc_first.insert(*nt, false);
             if *nt == 'S' {
-                follow.insert(*nt, HashSet::from([('#', l)]));
+                follow.insert(*nt, HashSet::from([('$', l)]));
             } else {
                 follow.insert(*nt, HashSet::new());
             }

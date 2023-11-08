@@ -37,10 +37,10 @@ footer {
   justify-content: center;
 }
 
-.muted {
-  color: var(--secondary);
+small {
+  color: var(--color) !important;
+  text-align: left;
 }
-
-a.secondary {
-  text-decoration: none;
+.muted {
+  color: var(--secondary) !important;
 }
